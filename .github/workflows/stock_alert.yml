@@ -1,0 +1,57 @@
+name: 00631L 股價監控
+
+on:
+  schedule:
+    # 台灣時間 09:00 = UTC 01:00（儲存昨日收盤價）
+    - cron: "0 1 * * 1-5"
+    # 台灣時間 10:30 = UTC 02:30（比較現價，必要時發警示）
+    - cron: "30 2 * * 1-5"
+  workflow_dispatch:  # 允許手動觸發（測試用）
+    inputs:
+      mode:
+        description: "執行模式 (save / check)"
+        required: true
+        default: "check"
+
+jobs:
+  stock-alert:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install yfinance
+
+      # ── 09:00：儲存昨日收盤價 ──────────────────────
+      - name: 儲存昨日收盤價 (09:00)
+        if: github.event.schedule == '0 1 * * 1-5'
+        env:
+          EMAIL_SENDER: ${{ secrets.EMAIL_SENDER }}
+          EMAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
+          EMAIL_RECEIVER: ${{ secrets.EMAIL_RECEIVER }}
+        run: python stock_alert.py save
+
+      # ── 10:30：檢查跌幅 ────────────────────────────
+      - name: 檢查跌幅並發送警示 (10:30)
+        if: github.event.schedule == '30 2 * * 1-5'
+        env:
+          EMAIL_SENDER: ${{ secrets.EMAIL_SENDER }}
+          EMAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
+          EMAIL_RECEIVER: ${{ secrets.EMAIL_RECEIVER }}
+        run: python stock_alert.py check
+
+      # ── 手動觸發 ───────────────────────────────────
+      - name: 手動執行
+        if: github.event_name == 'workflow_dispatch'
+        env:
+          EMAIL_SENDER: ${{ secrets.EMAIL_SENDER }}
+          EMAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
+          EMAIL_RECEIVER: ${{ secrets.EMAIL_RECEIVER }}
+        run: python stock_alert.py ${{ github.event.inputs.mode }}
