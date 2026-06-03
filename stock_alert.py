@@ -7,7 +7,7 @@ from datetime import datetime
 
 # ── 設定 ──────────────────────────────────────────
 STOCK_SYMBOL = "00631L.TW"
-DROP_THRESHOLD = 0.05       # 5% 跌幅警示
+DROP_THRESHOLD = -0.05       # 5% 跌幅警示
 LOOKBACK_DAYS = 3           # 跟幾天前比較
 
 # 從 GitHub Secrets 讀取 Email 設定
