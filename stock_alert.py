@@ -8,7 +8,7 @@ from datetime import datetime
 
 # ── 設定 ──────────────────────────────────────────
 STOCK_SYMBOL = "00631L.TW"
-DROP_THRESHOLD = 0.10       # 10% 跌幅警示
+DROP_THRESHOLD = 0.0       # 10% 跌幅警示
 PRICE_CACHE_FILE = "prev_close.json"
 
 # 從 GitHub Secrets 讀取 Email 設定
